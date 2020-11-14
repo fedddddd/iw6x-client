@@ -37,6 +37,50 @@ namespace game
 		ERR_MAPLOADERRORSUMMARY = 7,
 	};
 
+	enum hitLocation_t
+	{
+		HITLOC_NONE = 0x0,
+		HITLOC_HELMET = 0x1,
+		HITLOC_HEAD = 0x2,
+		HITLOC_NECK = 0x3,
+		HITLOC_TORSO_UPR = 0x4,
+		HITLOC_TORSO_MID = 0x5,
+		HITLOC_TORSO_LWR = 0x6,
+		HITLOC_R_ARM_UPR = 0x7,
+		HITLOC_L_ARM_UPR = 0x8,
+		HITLOC_R_ARM_LWR = 0x9,
+		HITLOC_L_ARM_LWR = 0xA,
+		HITLOC_R_HAND = 0xB,
+		HITLOC_L_HAND = 0xC,
+		HITLOC_R_LEG_UPR = 0xD,
+		HITLOC_L_LEG_UPR = 0xE,
+		HITLOC_R_LEG_LWR = 0xF,
+		HITLOC_L_LEG_LWR = 0x10,
+		HITLOC_R_FOOT = 0x11,
+		HITLOC_L_FOOT = 0x12,
+		HITLOC_GUN = 0x13,
+		HITLOC_RIOT = 0x14,
+		HITLOC_NUM = 0x15,
+	};
+
+	enum meansOfDeath
+	{
+		MOD_UNKNOWN = 0x0,
+		MOD_PISTOL_BULLET = 0x1,
+		MOD_RIFLE_BULLET = 0x2,
+		MOD_EXPLOSIVE_BULLET = 0x3,
+		MOD_GRENADE = 0x4,
+		MOD_GRENADE_SPLASH = 0x5,
+		MOD_PROJECTILE = 0x6,
+		MOD_PROJECTILE_SPLASH = 0x7,
+		MOD_MELEE = 0x8,
+		MOD_CRUSH = 0x9,
+		MOD_SUICIDE = 0x10,
+		MOD_TRIGGER_HURT = 0x11,
+		MOD_EXPLOSIVE = 0x12,
+		MOD_IMPACT = 0x13
+	};
+
 	enum CodPlayMode
 	{
 		CODPLAYMODE_NONE = 0x0,
@@ -1100,6 +1144,40 @@ namespace game
 		int team;
 		int archived;
 		int currentShowInKillcam;
+	};
+
+	struct VariableStackBuffer
+	{
+		const char* pos;
+		unsigned __int16 size;
+		unsigned __int16 bufLen;
+		unsigned __int16 localId;
+		char time;
+		char buf[1];
+	};
+
+	union VariableUnion
+	{
+		int intValue;
+		unsigned int uintValue;
+		float floatValue;
+		unsigned int stringValue;
+		const float* vectorValue;
+		const char* codePosValue;
+		unsigned int pointerValue;
+		VariableStackBuffer* stackValue;
+		unsigned int entityOffset;
+	};
+
+	struct VariableValue
+	{
+		VariableUnion u;
+		int type;
+	};
+
+	enum scr_string_t
+	{
+		scr_string_t_dummy = 0x0,
 	};
 
 	namespace sp

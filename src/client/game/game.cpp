@@ -44,6 +44,8 @@ namespace game
 	FS_ReadFile_t FS_ReadFile;
 	FS_FreeFile_t FS_FreeFile;
 
+	BG_GetWeaponNameComplete_t BG_GetWeaponNameComplete;
+
 	G_GivePlayerWeapon_t G_GivePlayerWeapon;
 	G_GetWeaponForName_t G_GetWeaponForName;
 	G_InitializeAmmo_t G_InitializeAmmo;
@@ -78,7 +80,14 @@ namespace game
 	Scr_GetFloat_t Scr_GetFloat;
 	Scr_GetNumParam_t Scr_GetNumParam;
 
+	Scr_PlayerConnect_t Scr_PlayerConnect;
+	Scr_PlayerDisconnect_t Scr_PlayerDisconnect;
+	Scr_PlayerDamage_t Scr_PlayerDamage;
+	Scr_PlayerKilled_t Scr_PlayerKilled;
+
 	SEH_StringEd_GetString_t SEH_StringEd_GetString;
+
+	SL_ConvertToString_t SL_ConvertToString;
 
 	SV_GameSendServerCommand_t SV_GameSendServerCommand;
 	SV_Loaded_t SV_Loaded;
@@ -96,6 +105,10 @@ namespace game
 	SV_SetConfigstring_t SV_SetConfigstring;
 	SV_SpawnTestClient_t SV_SpawnTestClient;
 
+	SV_Cmd_ArgvBuffer_t SV_Cmd_ArgvBuffer;
+
+	ClientCommand_t ClientCommand;
+
 	Sys_IsDatabaseReady2_t Sys_IsDatabaseReady2;
 	Sys_Milliseconds_t Sys_Milliseconds;
 	Sys_SendPacket_t Sys_SendPacket;
@@ -110,6 +123,8 @@ namespace game
 	dwGetLogOnStatus_t dwGetLogOnStatus;
 
 	int* keyCatchers;
+
+	ConcatArgs_t ConcatArgs;
 
 	CmdArgs* cmd_args;
 	CmdArgs* sv_cmd_args;
@@ -238,6 +253,8 @@ namespace game
 			Dvar_Sort = Dvar_Sort_t(SELECT_VALUE(0x14042DEF0, 0x1404F1210));
 			Dvar_ValueToString = Dvar_ValueToString_t(SELECT_VALUE(0x14042E710, 0x1404F1A30));
 
+			BG_GetWeaponNameComplete = BG_GetWeaponNameComplete_t(SELECT_VALUE(0, 0x140239370));
+
 			G_GivePlayerWeapon = G_GivePlayerWeapon_t(SELECT_VALUE(0x140359E20, 0x1403DA5E0));
 			G_GetWeaponForName = G_GetWeaponForName_t(SELECT_VALUE(0x140359890, 0x1403DA060));
 			G_InitializeAmmo = G_InitializeAmmo_t(SELECT_VALUE(0x140311F00, 0x14039AEA0));
@@ -275,7 +292,14 @@ namespace game
 			Scr_GetFloat = Scr_GetFloat_t(SELECT_VALUE(0, 0x140438D60));
 			Scr_GetNumParam = Scr_GetNumParam_t(SELECT_VALUE(0, 0x140438EC0));
 
+			Scr_PlayerConnect = Scr_PlayerConnect_t(SELECT_VALUE(0, 0x1403CE0A0));
+			Scr_PlayerDisconnect = Scr_PlayerDisconnect_t(SELECT_VALUE(0, 0x1403CE200));
+			Scr_PlayerDamage = Scr_PlayerDamage_t(SELECT_VALUE(0, 0x1403CE0C0));
+			Scr_PlayerKilled = Scr_PlayerKilled_t(SELECT_VALUE(0, 0x1403CE260));
+
 			SEH_StringEd_GetString = SEH_StringEd_GetString_t(SELECT_VALUE(0x0, 0x1404A5F60));
+
+			SL_ConvertToString = SL_ConvertToString_t(SELECT_VALUE(0x1403D6870, 0x1404317F0));
 
 			SV_GameSendServerCommand = SV_GameSendServerCommand_t(SELECT_VALUE(0x140490F40, 0x1404758C0));
 			SV_Loaded = SV_Loaded_t(SELECT_VALUE(0x140491820, 0x1404770C0));
@@ -291,6 +315,10 @@ namespace game
 			SV_SetConfigstring = SV_SetConfigstring_t(SELECT_VALUE(0, 0x140477450));
 			SV_SpawnTestClient = SV_SpawnTestClient_t(SELECT_VALUE(0, 0x1404740A0));
 
+			SV_Cmd_ArgvBuffer = SV_Cmd_ArgvBuffer_t(SELECT_VALUE(0, 0x1403F80D0));
+
+			ClientCommand = ClientCommand_t(SELECT_VALUE(0, 0x1403929B0));
+
 			Sys_IsDatabaseReady2 = Sys_IsDatabaseReady2_t(SELECT_VALUE(0x1403C2D40, 0x140423920));
 			Sys_Milliseconds = Sys_Milliseconds_t(SELECT_VALUE(0x14043D2A0, 0x140501CA0));
 			Sys_SendPacket = Sys_SendPacket_t(SELECT_VALUE(0x14043D000, 0x140501A00));
@@ -305,6 +333,8 @@ namespace game
 			dwGetLogOnStatus = dwGetLogOnStatus_t(SELECT_VALUE(0, 0x140589490));
 
 			keyCatchers = reinterpret_cast<int*>(SELECT_VALUE(0x1417CF6E0, 0x1419E1ADC));
+
+			ConcatArgs = ConcatArgs_t(SELECT_VALUE(0, 0x140392880));
 
 			cmd_args = reinterpret_cast<CmdArgs*>(SELECT_VALUE(0x144CE7F70, 0x144518480));
 			sv_cmd_args = reinterpret_cast<CmdArgs*>(SELECT_VALUE(0x144CE8020, 0x144518530));

@@ -113,6 +113,12 @@ namespace game
 	typedef void (*FS_FreeFile_t)(void* buffer);
 	extern FS_FreeFile_t FS_FreeFile;
 
+	typedef char* (*BG_GetWeaponNameComplete_t)(game::Weapon, bool, char*, unsigned int);
+	extern BG_GetWeaponNameComplete_t BG_GetWeaponNameComplete;
+
+	typedef game::scr_string_t(*G_GetHitLocationString_t)(game::hitLocation_t);
+	extern G_GetHitLocationString_t G_GetHitLocationString;
+
 	typedef int (*G_GivePlayerWeapon_t)(playerState_s* ps, Weapon weapon, int dualWield, int startInAltMode, int usedBefore);
 	extern G_GivePlayerWeapon_t G_GivePlayerWeapon;
 
@@ -182,8 +188,23 @@ namespace game
 	typedef int (*Scr_GetNumParam_t)();
 	extern Scr_GetNumParam_t Scr_GetNumParam;
 
+	typedef void (*Scr_PlayerConnect_t)(mp::gentity_s*);
+	extern Scr_PlayerConnect_t Scr_PlayerConnect;
+
+	typedef void (*Scr_PlayerDisconnect_t)(mp::gentity_s*, const char*);
+	extern Scr_PlayerDisconnect_t Scr_PlayerDisconnect;
+
+	typedef void (*Scr_PlayerDamage_t)(mp::gentity_s*, const mp::gentity_s*, mp::gentity_s*, int, int, int, const Weapon, bool, const float*, const float*, const hitLocation_t, int);
+	extern Scr_PlayerDamage_t Scr_PlayerDamage;
+
+	typedef void (*Scr_PlayerKilled_t)(mp::gentity_s*, const mp::gentity_s*, mp::gentity_s*, int, int, const Weapon, bool, const float*, const hitLocation_t, int, int);
+	extern Scr_PlayerKilled_t Scr_PlayerKilled;
+
 	typedef const char* (*SEH_StringEd_GetString_t)(const char*);
 	extern SEH_StringEd_GetString_t SEH_StringEd_GetString;
+
+	typedef const char* (*SL_ConvertToString_t)(scr_string_t stringValue);
+	extern SL_ConvertToString_t SL_ConvertToString;
 
 	typedef void (*SV_GameSendServerCommand_t)(int, int, const char*);
 	extern SV_GameSendServerCommand_t SV_GameSendServerCommand;
@@ -224,6 +245,9 @@ namespace game
 	typedef void (*SV_SpawnTestClient_t)(mp::gentity_s*);
 	extern SV_SpawnTestClient_t SV_SpawnTestClient;
 
+	typedef void (*SV_Cmd_ArgvBuffer_t)(int, char*, int);
+	extern SV_Cmd_ArgvBuffer_t SV_Cmd_ArgvBuffer;
+
 	typedef bool (*Sys_IsDatabaseReady2_t)();
 	extern Sys_IsDatabaseReady2_t Sys_IsDatabaseReady2;
 
@@ -251,6 +275,12 @@ namespace game
 	extern dwGetLogOnStatus_t dwGetLogOnStatus;
 
 	extern int* keyCatchers;
+
+	typedef void (*ClientCommand_t)(int);
+	extern ClientCommand_t ClientCommand;
+
+	typedef char* (*ConcatArgs_t)(int);
+	extern ConcatArgs_t ConcatArgs;
 
 	extern CmdArgs* cmd_args;
 	extern cmd_function_s** cmd_functions;
@@ -289,6 +319,9 @@ namespace game
 
 	int SV_Cmd_Argc();
 	const char* SV_Cmd_Argv(int index);
+
+	typedef char* (*ConcatArgs_t)(int);
+	extern ConcatArgs_t ConcatArgs;
 
 	namespace environment
 	{
