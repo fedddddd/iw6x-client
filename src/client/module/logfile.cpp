@@ -77,6 +77,7 @@ namespace logfile
 		utils::hook::detour client_command_hook;
 
 		utils::hook::detour exit_level_hook;
+		utils::hook::detour shutdown_game_hook;
 		utils::hook::detour init_game_hook;
 
 		std::string get_clean_name(const char* name)
@@ -211,6 +212,14 @@ namespace logfile
 			return exit_level_hook.invoke<void>();
 		}
 
+		void shutdown_game_stub(int freeScripts)
+		{
+			queue_message("ShutdownGame:");
+			queue_message("------------------------------------------------------------");
+
+			return shutdown_game_hook.invoke<void>(freeScripts);
+		}
+
 		void init_game_stub(int restart, int registerDvars, int savegame)
 		{
 			queue_message("------------------------------------------------------------");
@@ -251,13 +260,14 @@ namespace logfile
 			});
 
 			exit_level_hook.create(0x14039E2E0, exit_level_stub);
+			shutdown_game_hook.create(0x1403A0DF0, shutdown_game_stub);
 			init_game_hook.create(0x140475B00, init_game_stub);
 
 			client_command_hook.create(0x1403929B0, client_command_stub);
 
 			player_connect_hook.create(0x1403CE0A0, player_connect_stub);
 			player_disconnect_hook.create(0x1403CE200, player_disconnect_stub);
-
+			
 			player_damage_hook.create(0x1403CE0C0, player_damage_stub);
 			player_killed_hook.create(0x1403CE260, player_killed_stub);
 		}
