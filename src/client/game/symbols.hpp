@@ -64,6 +64,9 @@ namespace game
 	static Symbol<long long (const char* qpath, char** buffer)> FS_ReadFile{0x14041D0B0, 0x1404DE900};
 	static Symbol<void (void* buffer)> FS_FreeFile{0x14041D0A0, 0x1404DE8F0};
 
+	static Symbol<char* (const Weapon weapon, bool isAlternate, char* output, unsigned int maxStringLen)>
+	BG_GetWeaponNameComplete{0, 0x140239370};
+
 	static Symbol<int (playerState_s* ps, Weapon weapon, int dualWield, int startInAltMode, int usedBefore)>
 	G_GivePlayerWeapon{0x140359E20, 0x1403DA5E0};
 	static Symbol<Weapon(const char* name)> G_GetWeaponForName{0x140359890, 0x1403DA060};
@@ -125,6 +128,9 @@ namespace game
 	static Symbol<void (int clientNum, const char* reason)> SV_KickClientNum{0, 0x14046F730};
 	static Symbol<void (int index, const char* string)> SV_SetConfigstring{0, 0x140477450};
 	static Symbol<void (mp::gentity_s*)> SV_SpawnTestClient{0, 0x1404740A0};
+	static Symbol<void (int arg, char* buffer, int bufferLength)> SV_Cmd_ArgvBuffer{0, 0x1403F80D0};
+
+	static Symbol<char* (int arg)> ConcatArgs{0, 0x140392880};
 
 	static Symbol<bool ()> Sys_IsDatabaseReady2{0x1403C2D40, 0x140423920};
 	static Symbol<int ()> Sys_Milliseconds{0x14043D2A0, 0x140501CA0};
