@@ -97,6 +97,7 @@ namespace game
 	static Function<long long (const char* qpath, char** buffer)> FS_ReadFile{0x14041D0B0, 0x1404DE900};
 	static Function<void (void* buffer)> FS_FreeFile{0x14041D0A0, 0x1404DE8F0};
 
+	static Function<char* (const Weapon weapon, bool isAlternate, char* output, unsigned int maxStringLen)> BG_GetWeaponNameComplete{0, 0x140239370};
 	static Function<int (playerState_s* ps, Weapon weapon, int dualWield, int startInAltMode, int usedBefore)> G_GivePlayerWeapon{0x140359E20, 0x1403DA5E0};
 	static Function<Weapon(const char* name)> G_GetWeaponForName{0x140359890, 0x1403DA060};
 	static Function<void (playerState_s* ps, Weapon weapon, int hadWeapon)> G_InitializeAmmo{0x140311F00, 0x14039AEA0};
@@ -148,6 +149,7 @@ namespace game
 	static Function<void (int clientNum, const char* reason)> SV_KickClientNum{0, 0x14046F730};
 	static Function<void (int index, const char* string)> SV_SetConfigstring{0, 0x140477450};
 	static Function<void (mp::gentity_s*)> SV_SpawnTestClient{0, 0x1404740A0};
+	static Function<void (int arg, char* buffer, int bufferLength)> SV_Cmd_ArgvBuffer{0, 0x1403F80D0};
 
 	static Function<bool ()> Sys_IsDatabaseReady2{0x1403C2D40, 0x140423920};
 	static Function<int ()> Sys_Milliseconds{0x14043D2A0, 0x140501CA0};
@@ -162,13 +164,9 @@ namespace game
 
 	static Function<DWOnlineStatus (int)> dwGetLogOnStatus{0, 0x140589490};
 
+	static Function<char* (int arg)> ConcatArgs{ 0, 0x140392880 };
+
 	extern int* keyCatchers;
-
-	typedef void (*ClientCommand_t)(int);
-	extern ClientCommand_t ClientCommand;
-
-	typedef char* (*ConcatArgs_t)(int);
-	extern ConcatArgs_t ConcatArgs;
 
 	extern CmdArgs* cmd_args;
 	extern cmd_function_s** cmd_functions;

@@ -5,8 +5,6 @@ namespace game
 {
 	int* keyCatchers;
 
-	ConcatArgs_t ConcatArgs;
-
 	CmdArgs* cmd_args;
 	CmdArgs* sv_cmd_args;
 	cmd_function_s** cmd_functions;
@@ -97,8 +95,6 @@ namespace game
 		void initialize()
 		{
 			keyCatchers = reinterpret_cast<int*>(SELECT_VALUE(0x1417CF6E0, 0x1419E1ADC));
-
-			ConcatArgs = ConcatArgs_t(SELECT_VALUE(0, 0x140392880));
 
 			cmd_args = reinterpret_cast<CmdArgs*>(SELECT_VALUE(0x144CE7F70, 0x144518480));
 			sv_cmd_args = reinterpret_cast<CmdArgs*>(SELECT_VALUE(0x144CE8020, 0x144518530));

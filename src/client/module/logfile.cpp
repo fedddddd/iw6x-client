@@ -253,13 +253,13 @@ namespace logfile
 			exit_level_hook.create(0x14039E2E0, exit_level_stub);
 			init_game_hook.create(0x140475B00, init_game_stub);
 
-			client_command_hook.create(game::ClientCommand, client_command_stub);
+			client_command_hook.create(0x1403929B0, client_command_stub);
 
-			player_connect_hook.create(game::Scr_PlayerConnect, player_connect_stub);
-			player_disconnect_hook.create(game::Scr_PlayerDisconnect, player_disconnect_stub);
+			player_connect_hook.create(0x1403CE0A0, player_connect_stub);
+			player_disconnect_hook.create(0x1403CE200, player_disconnect_stub);
 
-			player_damage_hook.create(game::Scr_PlayerDamage, player_damage_stub);
-			player_killed_hook.create(game::Scr_PlayerKilled, player_killed_stub);
+			player_damage_hook.create(0x1403CE0C0, player_damage_stub);
+			player_killed_hook.create(0x1403CE260, player_killed_stub);
 		}
 		void pre_destroy() override
 		{
