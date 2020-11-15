@@ -135,6 +135,7 @@ namespace game
 	static Symbol<bool ()> Sys_IsDatabaseReady2{0x1403C2D40, 0x140423920};
 	static Symbol<int ()> Sys_Milliseconds{0x14043D2A0, 0x140501CA0};
 	static Symbol<bool (int, void const*, const netadr_s*)> Sys_SendPacket{0x14043D000, 0x140501A00};
+	static Symbol<void (const char* path)> Sys_Mkdir{0, 0x1404F98B0};
 
 	static Symbol<void ()> SwitchToCoreMode{0, 0x1401FA4A0};
 	static Symbol<void ()> SwitchToAliensMode{0, 0x1401FA4D0};

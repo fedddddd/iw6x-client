@@ -14,7 +14,6 @@ namespace logfile
 
 	std::queue<std::string> message_queue;
 	std::mutex mutex;
-	std::string logpath;
 	std::ofstream stream;
 
 	std::string trail_character(std::string string, int length, const char* c)
@@ -97,24 +96,32 @@ namespace logfile
 			return mod_string;
 		}
 
+		std::string get_dirname(const std::string& fname)
+		{
+			size_t pos = fname.find_last_of("\\/");
+			return (std::string::npos == pos)
+				? ""
+				: fname.substr(0, pos);
+		}
+
 		void player_connect_stub(game::mp::gentity_s* self)
 		{
-			char clean_name[32] = { 0 };
-			strncpy_s(clean_name, self->client->sess.cs.name, 32);
-			game::I_CleanStr(clean_name);
-
-			queue_message(utils::string::va("J;%s;%i;%s", game::SV_GetGuid(self->client->ps.clientNum), self->client->ps.clientNum, clean_name));
+			queue_message(utils::string::va("J;%s;%i;%s", 
+				game::SV_GetGuid(self->client->ps.clientNum), 
+				self->client->ps.clientNum, 
+				get_clean_name(self->client->sess.cs.name).data())
+			);
 
 			return player_connect_hook.invoke<void>(self);
 		}
 
 		void player_disconnect_stub(game::mp::gentity_s* self, const char* reason)
 		{
-			char clean_name[32] = { 0 };
-			strncpy_s(clean_name, self->client->sess.cs.name, 32);
-			game::I_CleanStr(clean_name);
-
-			queue_message(utils::string::va("Q;%s;%i;%s", game::SV_GetGuid(self->client->ps.clientNum), self->client->ps.clientNum, clean_name));
+			queue_message(utils::string::va("Q;%s;%i;%s", 
+				game::SV_GetGuid(self->client->ps.clientNum), 
+				self->client->ps.clientNum, 
+				get_clean_name(self->client->sess.cs.name).data())
+			);
 
 			return player_disconnect_hook.invoke<void>(self, reason);
 		}
@@ -186,15 +193,11 @@ namespace logfile
 				hidden = message[1] == '/';
 				message.erase(0, hidden ? 2 : 1);
 
-				char clean_name[32] = { 0 };
-				strncpy_s(clean_name, self->client->sess.cs.name, 32);
-				game::I_CleanStr(clean_name);
-
 				queue_message(utils::string::va("%s;%s;%i;%s;%s",
 					cmd == "say"s ? "say" : "sayteam",
 					game::SV_GetGuid(clientNum),
 					clientNum,
-					clean_name,
+					get_clean_name(self->client->sess.cs.name).data(),
 					message.data()
 				));
 			}
@@ -250,9 +253,13 @@ namespace logfile
 					return;
 				}
 
-				logpath = game::Dvar_FindVar("fs_basepath")->current.string;
-				logpath.append("\\iw6x\\");
-				logpath.append(g_logpath->current.string);
+				const auto logpath = utils::string::va("%s\\%s\\%s", 
+					game::Dvar_FindVar("fs_basepath")->current.string, 
+					game::Dvar_FindVar("fs_basegame")->current.string,
+					g_logpath->current.string
+				);
+
+				game::Sys_Mkdir(get_dirname(logpath).data());
 
 				stream.open(logpath, std::ofstream::out | std::ofstream::app);
 
