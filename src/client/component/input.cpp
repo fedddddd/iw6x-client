@@ -5,6 +5,7 @@
 
 #include "game_console.hpp"
 #include "server_list.hpp"
+#include "scoreboard.hpp"
 
 #include <utils/hook.hpp>
 
@@ -33,6 +34,11 @@ namespace input
 			}
 
 			if (game::environment::is_mp() && !server_list::sl_key_event(key, down))
+			{
+				return;
+			}
+
+			if (scoreboard::scoreboard_key_event(local_client_num, key, down))
 			{
 				return;
 			}

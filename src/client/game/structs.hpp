@@ -1491,6 +1491,27 @@ namespace game
 			int numClients;
 		};
 
+		struct score_t
+		{
+			int client;
+			int status;
+			int score;
+			int ping;
+			int deaths;
+			int team;
+			int kills;
+			int rank_mp;
+			int prestige_mp;
+			char _0x24[0x4];
+			const char* rankDisplayLevel;
+			int assists;
+			int extrascore0;
+			int extrascore1;
+			char _0x3C[0x8];
+			Material* hStatusIcon;
+			Material* hRankIcon;
+		};
+
 		struct cg_s
 		{
 			playerState_s ps;
