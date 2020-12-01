@@ -2,33 +2,62 @@
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
-#include "utils/hook.hpp"
+#include <utils/hook.hpp>
 
-#include "game/scripting/script_value.hpp"
 #include "game/scripting/entity.hpp"
 #include "game/scripting/execution.hpp"
+#include "game/scripting/event.hpp"
+
+#include "scheduler.hpp"
 
 namespace scripting
 {
 	namespace
 	{
-		struct event
+		void test_hud_elem(const event& e)
 		{
-			std::string name;
-			unsigned int entity_id{};
-			std::vector<script_value> arguments;
-		};
+			const auto& player = e.entity;
+			const auto name = player.get<std::string>("name");
 
-		void test_call(const event& e)
-		{
-			const entity player(e.entity_id);
-			const auto name = player.get("name").as<std::string>();
-
-			const auto hudelem = call_function("newHudElem", {}).as<entity>();
+			const auto hudelem = call<entity>("newHudElem");
 			hudelem.set("fontscale", 1);
 			hudelem.set("alpha", 1);
 
 			hudelem.call("setText", {"^1Hello ^2" + name + "^5!"});
+
+			player.call("iclientprintlnbold", {"^1The heli is following you!"});
+		}
+
+		void test_heli(const event& e)
+		{
+			test_hud_elem(e);
+
+			const auto& player = e.entity;
+			auto origin = player.get<vector>("origin");
+			const auto angles = player.get<vector>("angles");
+
+			origin[2] += 1000;
+
+			player.call("freezeControls", {false});
+
+			const auto heli = call<entity>("spawnhelicopter", {
+				                               player, origin, angles, "cobra_mp", "vehicle_battle_hind"
+			                               });
+
+			heli.call("setturningability", {1});
+			//heli.call("setlookatent", {player});
+			heli.call("setspeed", {40, 15, 5});
+			heli.call("setcandamage", {false});
+
+			// This is bad. Need good scheduling
+			scheduler::loop([player, heli]()
+			{
+				auto origin = player.get<vector>("origin");
+
+				origin[2] += 1000;
+
+				heli.call("setvehgoalpos", {origin, 1});
+			}, scheduler::pipeline::server, 5s);
 		}
 
 		utils::hook::detour vm_notify_hook;
@@ -41,7 +70,7 @@ namespace scripting
 			{
 				event e;
 				e.name = string;
-				e.entity_id = notify_list_owner_id;
+				e.entity = notify_list_owner_id;
 
 				for (auto* value = top; value->type != game::SCRIPT_END; --value)
 				{
@@ -51,7 +80,7 @@ namespace scripting
 #ifdef DEV_BUILD
 				if (e.name == "spawned_player")
 				{
-					test_call(e);
+					//test_heli(e);
 				}
 #endif
 			}

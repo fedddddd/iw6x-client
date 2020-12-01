@@ -1,10 +1,16 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "system_check.hpp"
-#include "utils/hook.hpp"
-#include "utils/io.hpp"
-#include "utils/string.hpp"
+
 #include "game/game.hpp"
+
+#include <utils/hook.hpp>
+#include <utils/io.hpp>
+#include <utils/string.hpp>
+
+#include <exception/minidump.hpp>
+
+#include <version.hpp>
 
 namespace exception
 {
@@ -63,8 +69,10 @@ namespace exception
 
 			char filepath[MAX_PATH] = {0};
 			utils::io::create_directory("minidumps");
-			const auto filename = utils::string::va("%s-%d-%s.dmp", exe_ename.data(), game::environment::get_mode(),
-			                                        timestamp.data());
+			const auto* const filename = utils::string::va("%s-%d-%s-%s.dmp", exe_ename.data(),
+			                                               game::environment::get_mode(),
+			                                               VERSION,
+			                                               timestamp.data());
 
 			PathCombineA(filepath, "minidumps\\", filename);
 
@@ -77,38 +85,12 @@ namespace exception
 			return code == STATUS_INTEGER_OVERFLOW || code == STATUS_FLOAT_OVERFLOW;
 		}
 
-		constexpr MINIDUMP_TYPE get_minidump_type()
-		{
-			const auto type = MiniDumpIgnoreInaccessibleMemory //
-				| MiniDumpWithHandleData //
-				| MiniDumpScanMemory //
-				| MiniDumpWithProcessThreadData //
-				| MiniDumpWithFullMemoryInfo //
-				| MiniDumpWithThreadInfo;
-
-			return static_cast<MINIDUMP_TYPE>(type);
-		}
 
 		void write_minidump(const LPEXCEPTION_POINTERS exceptioninfo, const std::string& filename)
 		{
-			MINIDUMP_EXCEPTION_INFORMATION minidump_exception_info = {GetCurrentThreadId(), exceptioninfo, FALSE};
-
-			auto* const file_handle = CreateFileA(filename.data(), GENERIC_WRITE | GENERIC_READ,
-			                                      FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_ALWAYS, NULL,
-			                                      nullptr);
-			const auto _ = gsl::finally([file_handle]()
-			{
-				CloseHandle(file_handle);
-			});
-
-			if (!MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file_handle, get_minidump_type(),
-			                       &minidump_exception_info,
-			                       nullptr,
-			                       nullptr))
-			{
-				MessageBoxA(nullptr, "There was an error creating the minidump! Hit OK to close the program.",
-				            "Minidump Error", MB_OK | MB_ICONERROR);
-			}
+			const auto data = create_minidump(exceptioninfo);
+			//data = utils::compression::zlib::compress(data);
+			utils::io::write_file(filename, data);
 		}
 
 		void suspend_other_threads()

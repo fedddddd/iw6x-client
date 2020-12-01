@@ -1,5 +1,6 @@
 #include <std_include.hpp>
 #include "script_value.hpp"
+#include "entity.hpp"
 
 
 namespace scripting
@@ -74,6 +75,20 @@ namespace scripting
 		game::VariableValue variable{};
 		variable.type = game::SCRIPT_OBJECT;
 		variable.u.pointerValue = value.get_entity_id();
+
+		this->value_ = variable;
+	}
+
+	script_value::script_value(const vector& value)
+	{
+		game::VariableValue variable{};
+		variable.type = game::SCRIPT_VECTOR;
+		variable.u.vectorValue = game::Scr_AllocVector(value);
+
+		const auto _ = gsl::finally([&variable]()
+		{
+			game::RemoveRefToValue(variable.type, variable.u);
+		});
 
 		this->value_ = variable;
 	}
@@ -188,6 +203,22 @@ namespace scripting
 	entity script_value::get() const
 	{
 		return entity(this->get_raw().u.pointerValue);
+	}
+
+	/***************************************************************
+	 * Vector
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<vector>() const
+	{
+		return this->get_raw().type == game::SCRIPT_VECTOR;
+	}
+
+	template <>
+	vector script_value::get() const
+	{
+		return this->get_raw().u.vectorValue;
 	}
 
 	/***************************************************************

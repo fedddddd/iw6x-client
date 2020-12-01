@@ -1,6 +1,6 @@
 ![license](https://img.shields.io/github/license/XLabsProject/iw6x-client.svg)
 [![open bugs](https://img.shields.io/github/issues/XLabsProject/iw6x-client/bug?label=bugs)](https://github.com/XLabsProject/iw6x-client/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
-[![Build status](https://ci.appveyor.com/api/projects/status/9v0mvgqxiltl2eai/branch/master?svg=true)](https://ci.appveyor.com/project/XLabsProject/iw6x-client/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/9v0mvgqxiltl2eai/branch/develop?svg=true)](https://ci.appveyor.com/project/XLabsProject/iw6x-client/branch/develop)
 [![Build](https://github.com/XLabsProject/iw6x-client/workflows/Build/badge.svg)](https://github.com/XLabsProject/iw6x-client/actions)
 [![discord](https://img.shields.io/endpoint?url=https://momo5502.com/iw4x/members-badge.php)](https://discord.gg/sKeVmR3)
 <!---
@@ -13,13 +13,29 @@
   <img alig src="assets/github/banner.png?raw=true" />
 </p>
 
+<br/><br/>
+
 ## Download
 
-- **[Click here to get the latest release](https://github.com/XLabsProject/iw6x-client/releases/latest)** (or [here](https://ci.appveyor.com/api/projects/XLabsProject/iw6x-client/artifacts/build%2Fbin%2Fx64%2FRelease%2Fiw6x.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202019%2C%20PREMAKE_ACTION%3Dvs2019%2C%20CI%3D1%3B%20Configuration%3A%20Release) for the develop build)
+- **[Click here to get the latest release](https://ci.appveyor.com/api/projects/XLabsProject/iw6x-client/artifacts/build%2Fbin%2Fx64%2FRelease%2Fiw6x.exe?branch=master&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202019%2C%20PREMAKE_ACTION%3Dvs2019%2C%20CI%3D1%3B%20Configuration%3A%20Release)** (if you are a tester or X Labs staff, get the develop build [here](https://ci.appveyor.com/api/projects/XLabsProject/iw6x-client/artifacts/build%2Fbin%2Fx64%2FRelease%2Fiw6x.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202019%2C%20PREMAKE_ACTION%3Dvs2019%2C%20CI%3D1%3B%20Configuration%3A%20Release))
 - **You will need to drop this in your Call of Duty: Ghosts installation folder. If you don't have Call of Duty: Ghosts, get those game files first.**
-- The client is still in an early alpha stage. It is far from being usable and will have bugs!
+- The client is still in an early stage. It will have bugs!
 
-## Build
+<br/><br/>
+
+## Showcase
+
+| <img src="https://cdn.discordapp.com/attachments/768362250334765067/773279641540231259/iw6x-release.PNG" /> | <img src="https://pbs.twimg.com/media/EmTRxMJWEAIF6a9?format=jpg&name=large" /> |
+|:-:|:-:|
+| Server list | Scripting support |
+
+| <img src="https://cdn.discordapp.com/attachments/768362250334765067/768377199899836466/unknown_14.png" /> | <img src="https://cdn.discordapp.com/attachments/768362250334765067/768377317000085514/unknown.png" /> |
+|:-:|:-:|
+| Custom maps (soon™) | Mod support (soon™) |
+
+<br/><br/>
+
+## Compile from source
 
 - Clone the Git repo. Do NOT download it as ZIP, that won't work.
 - Update the submodules and run `premake5 vs2019` or simply use the delivered `generate.bat`.
@@ -31,6 +47,8 @@
 |:----------------------------|:-----------------------------------------------|
 | `--copy-to=PATH`            | Optional, copy the EXE to a custom folder after build, define the path here if wanted. |
 | `--dev-build`               | Enable development builds of the client. |
+
+<br/><br/>
 
 ## Disclaimer
 

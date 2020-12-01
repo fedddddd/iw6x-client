@@ -6,13 +6,14 @@
 #include "network.hpp"
 #include "scheduler.hpp"
 #include "server_list.hpp"
+#include "arxan.hpp"
 
 #include "steam/steam.hpp"
 
-#include "utils/string.hpp"
-#include "utils/info_string.hpp"
-#include "utils/cryptography.hpp"
-#include "utils/hook.hpp"
+#include <utils/string.hpp>
+#include <utils/info_string.hpp>
+#include <utils/cryptography.hpp>
+#include <utils/hook.hpp>
 
 namespace party
 {
@@ -153,11 +154,19 @@ namespace party
 		{
 			printf("Starting map: %s\n", mapname.data());
 			switch_gamemode_if_necessary(get_dvar_string("g_gametype"));
+
+			// This is bad, but it works for now
+			if (arxan::save_state())
+			{
+				arxan::trigger_reset_error();
+				return;
+			}
+
 			game::SV_StartMapForParty(0, mapname.data(), false, false);
 		}
 	}
-	
-	void didyouknow_stub(game::dvar_t* dvar, const char* string) 
+
+	void didyouknow_stub(game::dvar_t* dvar, const char* string)
 	{
 		if (dvar->name == "didyouknow"s && !party::sv_motd.empty())
 		{
@@ -179,7 +188,7 @@ namespace party
 
 			didyouknow_hook.create(game::Dvar_SetString, didyouknow_stub);
 
-			command::add("map", [](command::params& argument)
+			command::add("map", [](const command::params& argument)
 			{
 				if (argument.size() != 2)
 				{
@@ -197,7 +206,7 @@ namespace party
 				}
 			});
 
-			command::add("connect", [](command::params& argument)
+			command::add("connect", [](const command::params& argument)
 			{
 				if (argument.size() != 2)
 				{
@@ -211,14 +220,14 @@ namespace party
 				}
 			});
 
-			command::add("clientkick", [](command::params& params)
+			command::add("clientkick", [](const command::params& params)
 			{
 				if (params.size() < 2)
 				{
 					printf("usage: clientkick <num>\n");
 					return;
 				}
-				auto clientNum = atoi(params.get(1));
+				const auto clientNum = atoi(params.get(1));
 				if (clientNum < 0 || clientNum >= *game::mp::svs_numclients)
 				{
 					return;
@@ -227,15 +236,15 @@ namespace party
 				game::SV_KickClientNum(clientNum, "EXE_PLAYERKICKED");
 			});
 
-			command::add("kick", [](command::params& params)
+			command::add("kick", [](const command::params& params)
 			{
 				if (params.size() < 2)
 				{
 					printf("usage: kick <name>\n");
 					return;
 				}
-				auto name = params.get(1);
 
+				const std::string name = params.get(1);
 				if (name == "all"s)
 				{
 					for (auto i = 0; i < *game::mp::svs_numclients; ++i)
@@ -245,7 +254,7 @@ namespace party
 					return;
 				}
 
-				auto clientNum = get_client_num_from_name(name);
+				const auto clientNum = get_client_num_from_name(name);
 				if (clientNum < 0 || clientNum >= *game::mp::svs_numclients)
 				{
 					return;
@@ -261,59 +270,59 @@ namespace party
 				game::Dvar_RegisterString("didyouknow", "", game::DvarFlags::DVAR_FLAG_NONE, "");
 			}, scheduler::pipeline::main);
 
-			command::add("tell", [](command::params& params)
+			command::add("tell", [](const command::params& params)
 			{
 				if (params.size() < 3)
 				{
 					return;
 				}
 
-				auto clientNum = atoi(params.get(1));
-				std::string message = params.join(2);
-				std::string name = game::Dvar_FindVar("sv_sayName")->current.string;
+				const auto clientNum = atoi(params.get(1));
+				const auto message = params.join(2);
+				auto* const name = game::Dvar_FindVar("sv_sayName")->current.string;
 
 				game::SV_GameSendServerCommand(clientNum, 0,
-				                               utils::string::va("%c \"%s: %s\"", 84, name.data(), message.data()));
-				printf("%s -> %i: %s\n", name.data(), clientNum, message.data());
+				                               utils::string::va("%c \"%s: %s\"", 84, name, message.data()));
+				printf("%s -> %i: %s\n", name, clientNum, message.data());
 			});
 
-			command::add("tellraw", [](command::params& params)
+			command::add("tellraw", [](const command::params& params)
 			{
 				if (params.size() < 3)
 				{
 					return;
 				}
 
-				auto clientNum = atoi(params.get(1));
-				std::string message = params.join(2);
+				const auto clientNum = atoi(params.get(1));
+				const auto message = params.join(2);
 
 				game::SV_GameSendServerCommand(clientNum, 0, utils::string::va("%c \"%s\"", 84, message.data()));
 				printf("%i: %s\n", clientNum, message.data());
 			});
 
-			command::add("say", [](command::params& params)
+			command::add("say", [](const command::params& params)
 			{
 				if (params.size() < 2)
 				{
 					return;
 				}
 
-				std::string message = params.join(1);
-				std::string name = game::Dvar_FindVar("sv_sayName")->current.string;
+				const auto message = params.join(1);
+				const auto* const name = game::Dvar_FindVar("sv_sayName")->current.string;
 
 				game::SV_GameSendServerCommand(
-					-1, 0, utils::string::va("%c \"%s: %s\"", 84, name.data(), message.data()));
-				printf("%s: %s\n", name.data(), message.data());
+					-1, 0, utils::string::va("%c \"%s: %s\"", 84, name, message.data()));
+				printf("%s: %s\n", name, message.data());
 			});
 
-			command::add("sayraw", [](command::params& params)
+			command::add("sayraw", [](const command::params& params)
 			{
 				if (params.size() < 2)
 				{
 					return;
 				}
 
-				std::string message = params.join(1);
+				const auto message = params.join(1);
 
 				game::SV_GameSendServerCommand(-1, 0, utils::string::va("%c \"%s\"", 84, message.data()));
 				printf("%s\n", message.data());

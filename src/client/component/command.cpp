@@ -3,9 +3,10 @@
 #include "command.hpp"
 
 #include "game/game.hpp"
-#include "utils/hook.hpp"
-#include "utils/string.hpp"
-#include "utils/memory.hpp"
+
+#include <utils/hook.hpp>
+#include <utils/string.hpp>
+#include <utils/memory.hpp>
 
 namespace command
 {
@@ -56,7 +57,7 @@ namespace command
 			auto& com_num_console_lines = *reinterpret_cast<int*>(0x1445CFF98);
 			auto* com_console_lines = reinterpret_cast<char**>(0x1445CFFA0);
 
-			auto inq = 0;
+			auto inq = false;
 			com_console_lines[0] = command_line;
 			com_num_console_lines = 0;
 
@@ -90,21 +91,31 @@ namespace command
 		}
 	}
 
-	int params::size()
+	params::params()
+		: nesting_(game::cmd_args->nesting)
 	{
-		return game::Cmd_Argc();
 	}
 
-	const char* params::get(int index)
+	int params::size() const
 	{
-		return game::Cmd_Argv(index);
+		return game::cmd_args->argc[this->nesting_];
 	}
 
-	std::string params::join(int index)
+	const char* params::get(const int index) const
+	{
+		if (index >= this->size())
+		{
+			return "";
+		}
+
+		return game::cmd_args->argv[this->nesting_][index];
+	}
+
+	std::string params::join(const int index) const
 	{
 		std::string result = {};
 
-		for (int i = index; i < this->size(); i++)
+		for (auto i = index; i < this->size(); i++)
 		{
 			if (i > index) result.append(" ");
 			result.append(this->get(i));
@@ -112,21 +123,31 @@ namespace command
 		return result;
 	}
 
-	int params_sv::size()
+	params_sv::params_sv()
+		: nesting_(game::sv_cmd_args->nesting)
 	{
-		return game::SV_Cmd_Argc();
 	}
 
-	const char* params_sv::get(const int index)
+	int params_sv::size() const
 	{
-		return game::SV_Cmd_Argv(index);
+		return game::sv_cmd_args->argc[this->nesting_];
 	}
 
-	std::string params_sv::join(const int index)
+	const char* params_sv::get(const int index) const
+	{
+		if (index >= this->size())
+		{
+			return "";
+		}
+
+		return game::sv_cmd_args->argv[this->nesting_][index];
+	}
+
+	std::string params_sv::join(const int index) const
 	{
 		std::string result = {};
 
-		for (int i = index; i < this->size(); i++)
+		for (auto i = index; i < this->size(); i++)
 		{
 			if (i > index) result.append(" ");
 			result.append(this->get(i));
@@ -139,7 +160,7 @@ namespace command
 		game::Cmd_AddCommandInternal(name, callback, utils::memory::get_allocator()->allocate<game::cmd_function_s>());
 	}
 
-	void add(const char* name, const std::function<void(params&)>& callback)
+	void add(const char* name, const std::function<void(const params&)>& callback)
 	{
 		const auto command = utils::string::to_lower(name);
 
@@ -151,7 +172,7 @@ namespace command
 
 	void add(const char* name, const std::function<void()>& callback)
 	{
-		add(name, [callback](params&)
+		add(name, [callback](const params&)
 		{
 			callback();
 		});
@@ -165,7 +186,7 @@ namespace command
 		const auto command = utils::string::to_lower(name);
 
 		if (handlers_sv.find(command) == handlers_sv.end())
-			handlers_sv[command] = callback;
+			handlers_sv[command] = std::move(callback);
 	}
 
 	void execute(std::string command, const bool sync)
@@ -195,10 +216,7 @@ namespace command
 			{
 				utils::hook::call(0x14041213C, &parse_commandline_stub);
 
-				if (game::environment::is_mp())
-				{
-					add_mp_commands();
-				}
+				add_mp_commands();
 			}
 		}
 
@@ -231,10 +249,16 @@ namespace command
 					0, utils::string::va("ufo %s", game::sp::g_entities[0].client->flags & 2 ? "^2on" : "^1off"));
 			});
 
-			add("give", [](params& params)
+			add("give", [](const params& params)
 			{
 				if (!game::SV_Loaded())
 				{
+					return;
+				}
+
+				if (params.size() < 2)
+				{
+					game::CG_GameMessage(0, "You did not specify a weapon name");
 					return;
 				}
 
@@ -243,11 +267,30 @@ namespace command
 				if (game::G_GivePlayerWeapon(ps, wp, 0, 0, 0))
 				{
 					game::G_InitializeAmmo(ps, wp, 0);
+					game::G_SelectWeapon(0, wp);
 				}
+			});
+
+			add("take", [](const params& params)
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				if (params.size() < 2)
+				{
+					game::CG_GameMessage(0, "You did not specify a weapon name");
+					return;
+				}
+
+				auto ps = game::SV_GetPlayerstateForClientNum(0);
+				auto wp = game::G_GetWeaponForName(params.get(1));
+				game::G_TakePlayerWeapon(ps, wp);
 			});
 		}
 
-		void add_mp_commands()
+		static void add_mp_commands()
 		{
 			client_command_hook.create(0x1403929B0, &client_command);
 
@@ -307,6 +350,13 @@ namespace command
 					return;
 				}
 
+				if (params.size() < 4)
+				{
+					game::SV_GameSendServerCommand(client_num, 1,
+					                               "f \"You did not specify the correct number of coordinates\"");
+					return;
+				}
+
 				game::mp::g_entities[client_num].client->ps.origin[0] = std::strtof(params.get(1), nullptr);
 				game::mp::g_entities[client_num].client->ps.origin[1] = std::strtof(params.get(2), nullptr);
 				game::mp::g_entities[client_num].client->ps.origin[2] = std::strtof(params.get(3), nullptr);
@@ -317,6 +367,13 @@ namespace command
 				if (!game::Dvar_FindVar("sv_cheats")->current.enabled)
 				{
 					game::SV_GameSendServerCommand(client_num, 1, "f \"Cheats are not enabled on this server\"");
+					return;
+				}
+
+				if (params.size() < 4)
+				{
+					game::SV_GameSendServerCommand(client_num, 1,
+					                               "f \"You did not specify the correct number of coordinates\"");
 					return;
 				}
 
@@ -333,12 +390,38 @@ namespace command
 					return;
 				}
 
+				if (params.size() < 2)
+				{
+					game::SV_GameSendServerCommand(client_num, 1, "f \"You did not specify a weapon name\"");
+					return;
+				}
+
 				auto ps = game::SV_GetPlayerstateForClientNum(client_num);
 				auto wp = game::G_GetWeaponForName(params.get(1));
 				if (game::G_GivePlayerWeapon(ps, wp, 0, 0, 0))
 				{
 					game::G_InitializeAmmo(ps, wp, 0);
+					game::G_SelectWeapon(client_num, wp);
 				}
+			});
+
+			add_sv("take", [](const int client_num, params_sv& params)
+			{
+				if (!game::Dvar_FindVar("sv_cheats")->current.enabled)
+				{
+					game::SV_GameSendServerCommand(client_num, 1, "f \"Cheats are not enabled on this server\"");
+					return;
+				}
+
+				if (params.size() < 2)
+				{
+					game::SV_GameSendServerCommand(client_num, 1, "f \"You did not specify a weapon name\"");
+					return;
+				}
+
+				auto ps = game::SV_GetPlayerstateForClientNum(client_num);
+				auto wp = game::G_GetWeaponForName(params.get(1));
+				game::G_TakePlayerWeapon(ps, wp);
 			});
 		}
 	};

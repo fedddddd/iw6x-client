@@ -1,10 +1,12 @@
 #pragma once
 #include "game/game.hpp"
 #include "variable_value.hpp"
-#include "entity.hpp"
+#include "vector.hpp"
 
 namespace scripting
 {
+	class entity;
+
 	class script_value
 	{
 	public:
@@ -17,11 +19,13 @@ namespace scripting
 
 		script_value(float value);
 		script_value(double value);
-		
+
 		script_value(const char* value);
 		script_value(const std::string& value);
-		
+
 		script_value(const entity& value);
+
+		script_value(const vector& value);
 
 		template <typename T>
 		bool is() const;
