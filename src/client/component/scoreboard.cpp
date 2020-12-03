@@ -25,6 +25,8 @@ namespace scoreboard
 		float base_x = 1.f;
 		float base_y = 1.f;
 
+		float scoreboard_width = 1300.f;
+
 		float team_colors[5][4] =
 		{
 			{ 1.f, 1.f, 1.f, 0.5f },
@@ -80,7 +82,7 @@ namespace scoreboard
 			scale_x = game::ScrPlace_GetViewPlacement()->realViewportSize[0] / 2560.f;
 			scale_y = game::ScrPlace_GetViewPlacement()->realViewportSize[1] / 1440.f;
 
-			base_y -= (get_client_count() / 2) * (50.f * scale_y);
+			base_y -= (get_client_count() / 2) * (25.f * scale_y);
 			base_y = std::max(base_y, 200.f * scale_y);
 		}
 
@@ -117,7 +119,7 @@ namespace scoreboard
 
 		void draw_box(float x, float y, float w, float h, game::vec4_t _dark_color, game::vec4_t _color)
 		{
-			x = x * scale_x + base_x;
+			x = x * scale_x + (2 * base_x - scoreboard_width / 2);
 			y = y * scale_y + base_y;
 
 			w *= scale_x;
@@ -162,30 +164,30 @@ namespace scoreboard
 			const auto self = scores[num];
 			const auto score_info = clientScores[self.client];
 
-
-
 			const auto text_y_offset = y + h - scoreboard_font->pixelHeight / 4;
 			const char* name = reinterpret_cast<const char*>(0x1417A7460 + 0xD8 * self.client);
 			const auto icon_height = h - 10.f;
 
-			draw_icon(50, y + 5.f, icon_height, icon_height, self.hRankIcon);
+			draw_icon(30.f, y + 5.f, icon_height, icon_height, self.hRankIcon);
+
+			draw_text(self.rankDisplayLevel, 30.f + icon_height, y + h, font_color);
 
 			if (self.hStatusIcon != NULL)
 			{
-				draw_icon(100, y + 5.f, icon_height, icon_height, self.hStatusIcon);
+				draw_icon(110.f, y + 5.f, icon_height, icon_height, self.hStatusIcon);
 			}
 
 			const auto _font_color = self.client == game::mp::cgArray->ps.clientNum 
-				? font_color_yellow 
-				: self.status == 2 ? font_color_red : font_color;
+				? font_color_yellow
+				: font_color;
 
-			draw_text(name, 150, text_y_offset, _font_color);
+			draw_text(name, 180.f, text_y_offset, _font_color);
 
 			auto x_offset = 500.f;
 			for (auto entry : scoreboard_entries)
 			{
 				entry.second(num, x_offset, text_y_offset);
-				x_offset += 800.f / scoreboard_entries.size();
+				x_offset += (scoreboard_width - 500.f) / scoreboard_entries.size();
 			}
 		}
 
@@ -203,6 +205,7 @@ namespace scoreboard
 
 			const auto teams = get_sorted_clients();
 			const auto offset = 0.f;
+
 			auto base_offset = 50.f;
 			auto drawn_clients = 0;
 
@@ -213,13 +216,13 @@ namespace scoreboard
 					continue;
 				}
 
-				draw_text(utils::string::va("%s (%i)", team_names[i], team_players[i]), 150, base_offset, font_color);
+				draw_text(utils::string::va("%s (%i)", team_names[i], team_players[i]), 180.f, base_offset, font_color);
 
 				auto x_offset = 500.f;
 				for (auto entry : scoreboard_entries)
 				{
 					draw_text(entry.first.data(), x_offset, base_offset, font_color);
-					x_offset += 800.f / scoreboard_entries.size();
+					x_offset += (scoreboard_width - 500.f) / scoreboard_entries.size();
 				}
 
 				for (auto c = 0; c < teams[i].size(); c++)
@@ -238,19 +241,18 @@ namespace scoreboard
 
 						const auto y_offset = base_offset + c * 50.f;
 						const auto height = scoreboard_font->pixelHeight * 1.5f;
-						const auto width = 1200.f;
 
 						drawn_clients++;
 
 						draw_box(0,
 							y_offset,
-							width,
+							scoreboard_width,
 							height,
 							background,
 							background
 						);
 
-						draw_player(teams[i][c], base_x, y_offset, width, height);
+						draw_player(teams[i][c], base_x, y_offset, scoreboard_width, height);
 					}
 				}
 
@@ -289,13 +291,9 @@ namespace scoreboard
 
 				const auto _font_color = self.client == game::mp::cgArray->ps.clientNum
 					? font_color_yellow
-					: self.status == 2 ? font_color_red : font_color;
+					: font_color;
 
-				const auto score = game::Com_GetCurrentCoDPlayMode() == game::CODPLAYMODE_CORE 
-					? self.score 
-					: score_info.score;
-
-				draw_text(utils::string::va("%i", score), x, y, _font_color);
+				draw_text(utils::string::va("%i", self.score), x, y, _font_color);
 			});
 
 			add_entry("Kills", [](int num, float x, float y)
@@ -305,29 +303,47 @@ namespace scoreboard
 
 				const auto _font_color = self.client == game::mp::cgArray->ps.clientNum
 					? font_color_yellow
-					: self.status == 2 ? font_color_red : font_color;
+					: font_color;
 
-				const auto kills = game::Com_GetCurrentCoDPlayMode() == game::CODPLAYMODE_CORE
-					? self.kills
-					: score_info.kills;
-
-				draw_text(utils::string::va("%i", kills), x, y, _font_color);
+				draw_text(utils::string::va("%i", self.kills), x, y, _font_color);
 			});
 
-			add_entry("Downs", [](int num, float x, float y)
+			add_entry("Deaths", [](int num, float x, float y)
 			{
 				const auto self = scores[num];
 				const auto score_info = clientScores[self.client];
 
 				const auto _font_color = self.client == game::mp::cgArray->ps.clientNum
 					? font_color_yellow
-					: self.status == 2 ? font_color_red : font_color;
-
-				const auto deaths = game::Com_GetCurrentCoDPlayMode() == game::CODPLAYMODE_CORE
-					? self.deaths
-					: score_info.deaths;
+					: font_color;
 
 				draw_text(utils::string::va("%i", self.deaths), x, y, _font_color);
+			});
+
+			add_entry("Assists", [](int num, float x, float y)
+			{
+				const auto self = scores[num];
+				const auto score_info = clientScores[self.client];
+
+				const auto _font_color = self.client == game::mp::cgArray->ps.clientNum
+					? font_color_yellow
+					: font_color;
+
+				draw_text(utils::string::va("%i", self.assists), x, y, _font_color);
+			});
+
+			add_entry("KDR", [](int num, float x, float y)
+			{
+				const auto self = scores[num];
+				const auto score_info = clientScores[self.client];
+
+				const auto _font_color = self.client == game::mp::cgArray->ps.clientNum
+					? font_color_yellow
+					: font_color;
+
+				const auto kdr = (float)self.kills / (float)std::max(self.deaths, 1);
+
+				draw_text(utils::string::va("%.2f", kdr), x, y, _font_color);
 			});
 
 			add_entry("Ping", [](int num, float x, float y)
