@@ -155,6 +155,7 @@ namespace game
 	WEAK Symbol<void()> Sys_ShowConsole{0x14043E650, 0x140503130};
 	WEAK Symbol<bool (int, void const*, const netadr_s*)> Sys_SendPacket{0x14043D000, 0x140501A00};
 	WEAK Symbol<void*(int valueIndex)> Sys_GetValue{0x1403C2C30, 0x1404237D0};
+	WEAK Symbol<void(const char* path)> Sys_Mkdir{0, 0x1404F98B0};
 
 	WEAK Symbol<void ()> SwitchToCoreMode{0, 0x1401FA4A0};
 	WEAK Symbol<void ()> SwitchToAliensMode{0, 0x1401FA4D0};

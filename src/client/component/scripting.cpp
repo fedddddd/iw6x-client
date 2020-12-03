@@ -4,14 +4,18 @@
 #include "game/game.hpp"
 #include <utils/hook.hpp>
 
-#include "game/scripting/entity.hpp"
-#include "game/scripting/execution.hpp"
-#include "game/scripting/event.hpp"
-
 #include "scheduler.hpp"
+#include "scripting.hpp"
 
 namespace scripting
 {
+	std::unordered_map<std::string, std::function<void(event&)>> event_callbacks;
+
+	void on(const char* name, std::function<void(event&)> callback)
+	{
+		event_callbacks[name] = callback;
+	}
+
 	namespace
 	{
 		void test_hud_elem(const event& e)
@@ -75,6 +79,11 @@ namespace scripting
 				for (auto* value = top; value->type != game::SCRIPT_END; --value)
 				{
 					e.arguments.emplace_back(*value);
+				}
+
+				if (event_callbacks.find(e.name) != event_callbacks.end())
+				{
+					event_callbacks[e.name](e);
 				}
 
 #ifdef DEV_BUILD

@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "command.hpp"
+#include "scripting.hpp"
 
 #include "game/game.hpp"
 
@@ -181,6 +182,17 @@ namespace command
 	void add_sv(const char* name, std::function<void(int, params_sv&)> callback)
 	{
 		// doing this so the sv command would show up in the console
+
+		add_raw(name, nullptr);
+
+		const auto command = utils::string::to_lower(name);
+
+		if (handlers_sv.find(command) == handlers_sv.end())
+			handlers_sv[command] = std::move(callback);
+	}
+
+	void add_sv(const char* name, std::function<void(int, const params_sv&)> callback)
+	{
 		add_raw(name, nullptr);
 
 		const auto command = utils::string::to_lower(name);
