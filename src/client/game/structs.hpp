@@ -1426,6 +1426,74 @@ namespace game
 		};
 #pragma pack(pop)
 
+		enum TraceHitType
+		{
+			TRACE_HITTYPE_NONE = 0x0,
+			TRACE_HITTYPE_ENTITY = 0x1,
+			TRACE_HITTYPE_DYNENT_MODEL = 0x2,
+			TRACE_HITTYPE_DYNENT_BRUSH = 0x3,
+		};
+
+		struct trace_t
+		{
+			float fraction;
+			float normal[3];
+			int surfaceFlags;
+			int contents;
+			const char* material;
+			TraceHitType hitType;
+			unsigned __int16 hitId;
+			unsigned __int16 modelIndex;
+			unsigned __int16 partName;
+			unsigned __int16 partGroup;
+			bool allsolid;
+			bool startsolid;
+			bool walkable;
+		};
+
+		struct pml_t
+		{
+			float forward[3];
+			float right[3];
+			float up[3];
+			float frametime;
+			int msec;
+			int walking;
+			int groundPlane;
+			int almostGroundPlane;
+			trace_t groundTrace;
+			float impactSpeed;
+			float previous_origin[3];
+			float previous_velocity[3];
+		};
+
+		struct Bounds
+		{
+			float midPoint[3];
+			float halfSize[3];
+		};
+
+		struct pmove_t
+		{
+			playerState_s* ps;
+			usercmd_s cmd;
+			usercmd_s oldcmd;
+			int tracemask;
+			int numtouch;
+			int touchents[32];
+			float mins[3];
+			float maxs[3];
+			float xyspeed;
+			int proneChange;
+			float maxSprintTimeMultiplier;
+			bool mantleStarted;
+			float mantleEndPos[3];
+			int mantleDuration;
+			int viewChangeTime;
+			float viewChange;
+			char handler;
+		};
+
 		struct ClientCustomizationInfo
 		{
 			unsigned int modelIndex[3];

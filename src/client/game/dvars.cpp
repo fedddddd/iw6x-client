@@ -24,8 +24,13 @@ namespace dvars
     game::dvar_t* jump_enableFallDamage = nullptr;
     game::dvar_t* jump_height = nullptr;
     game::dvar_t* jump_ladderPushVel = nullptr;
-
+    
     game::dvar_t* r_aspectRatioCustom = nullptr;
+
+    game::dvar_t* pm_cs_airspeedCap = nullptr;
+    game::dvar_t* pm_cs_airAccelerate = nullptr;
+    game::dvar_t* pm_cs_movement = nullptr;
+
     game::dvar_t* r_fullbright = nullptr;
 
     game::dvar_t* aimassist_enabled = nullptr;
