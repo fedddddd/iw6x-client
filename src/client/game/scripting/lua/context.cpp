@@ -6,6 +6,8 @@
 #include "../execution.hpp"
 #include "../functions.hpp"
 
+#include "../../../component/plugins.hpp"
+
 #include "../../../component/command.hpp"
 
 #include <utils/string.hpp>
@@ -258,6 +260,8 @@ namespace scripting::lua
 		};
 
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
+
+		plugins::initialize_context(folder.data(), &this->state_);
 
 		printf("Loading script '%s'\n", this->folder_.data());
 		this->load_script("__init__");
