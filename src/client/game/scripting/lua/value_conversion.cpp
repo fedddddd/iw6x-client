@@ -93,8 +93,6 @@ namespace scripting::lua
 				return values.size();
 			};
 
-			table[sol::metatable_key] = metatable;
-
 			table["getkeys"] = [values]()
 			{
 				std::vector<std::string> _keys;
@@ -106,6 +104,8 @@ namespace scripting::lua
 
 				return _keys;
 			};
+
+			table[sol::metatable_key] = metatable;
 
 			return table;
 		}
