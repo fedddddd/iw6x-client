@@ -8,18 +8,19 @@ namespace scripting::lua
 		struct array_value
 		{
 			int index;
-			sol::lua_value value{};
+			script_value value;
 		};
 
 		sol::lua_value entity_to_array(lua_State* state, unsigned int id)
 		{
 			auto table = sol::table::create(state);
+			auto metatable = sol::table::create(state);
 
 			std::unordered_map<std::string, array_value> values;
 
-			const auto offset = 51200 * (id & 1);
-			auto current = game::scr_VarGlob->objectVariableChildren[id].firstChild;
+			const auto offset = 0xC800 * (id & 1);
 
+			auto current = game::scr_VarGlob->objectVariableChildren[id].firstChild;
 			auto idx = 1;
 
 			for (auto i = offset + current; current; i = offset + current)
@@ -45,16 +46,14 @@ namespace scripting::lua
 
 				array_value value;
 				value.index = i;
-				value.value = convert(state, script_value(variable));
+				value.value = variable;
 
 				values[key] = value;
 
 				current = var.nextSibling;
 			}
 
-			auto metatable = sol::table::create(state);
-
-			metatable[sol::meta_function::new_index] = [state, values](const sol::table t, const sol::this_state s,
+			metatable[sol::meta_function::new_index] = [values](const sol::table t, const sol::this_state s,
 				const sol::lua_value& key_value, const sol::lua_value& value)
 			{
 				const auto key = key_value.is<int>()
@@ -66,14 +65,14 @@ namespace scripting::lua
 					return;
 				}
 
-				const auto variable = convert(value).get_raw();
+				const auto variable = convert({s, value}).get_raw();
 				const auto i = values.at(key).index;
 
 				game::scr_VarGlob->childVariableValue[i].type = (char)variable.type;
 				game::scr_VarGlob->childVariableValue[i].u.u = variable.u;
 			};
 
-			metatable[sol::meta_function::index] = [state, values](const sol::table t, const sol::this_state s,
+			metatable[sol::meta_function::index] = [values](const sol::table t, const sol::this_state s,
 				const sol::lua_value& key_value)
 			{
 				const auto key = key_value.is<int>()
@@ -85,7 +84,7 @@ namespace scripting::lua
 					return sol::lua_value{};
 				}
 
-				return values.at(key).value;
+				return convert(s, values.at(key).value);
 			};
 
 			metatable[sol::meta_function::length] = [values]()
@@ -107,7 +106,7 @@ namespace scripting::lua
 
 			table[sol::metatable_key] = metatable;
 
-			return table;
+			return {state, table};
 		}
 	}
 
